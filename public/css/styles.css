@@ -1,0 +1,11 @@
+.error{
+    color:red;
+}
+body{
+	margin: 10px 0px auto auto;
+	text-align: center;
+	font-size:20px;
+}
+.jumbotron{
+	font-weight:bold;
+}
