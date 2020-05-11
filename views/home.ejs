@@ -16,7 +16,7 @@
         </div>
         <div class="col-sm-2">
             <div class="form-group row">
-                <input class="btn btn-primary" type="button" value="Average Scores" data-toggle="collapse" data-target="#average" aria-expanded="true" aria-controls="average" <%= reports.length === 0 ? "hidden" : "" %>>
+                <input class="btn btn-primary" type="button" value="Average Scores" data-toggle="collapse" data-target="#average" aria-expanded="true" aria-controls="average" <%= reports.length === 0 || reports.length === 1 ? "hidden" : "" %>>
             </div>
         </div>
     </div>
