@@ -3,8 +3,9 @@
     <div class="jumbotron">
         <h1>Fancy Quiz</h1>
     </div>
+    <form>
     <div class="form-group row">
-        <div class="col-sm-5"></div>
+        <div class="col-sm-5 error"><%= error === true ? 'Invalid input.' : '' %></div>
         <div class="col-sm-1">
             <input class="btn btn-primary" type="button" value="See Report" data-toggle="collapse" data-target="#score" aria-expanded="true" aria-controls="score">
         </div>
@@ -27,25 +28,80 @@
     </div>
     <div class="form-group row">
         <div class="col-sm-5">
-        What is a javacript constant?<br>
+        <%=questions[answered].question%><br>
         <hr>
             <ul class="list-group">
-              <button type="button" class="list-group-item list-group-item-action">Cras justo odio</button>
-              <button type="button" class="list-group-item list-group-item-action">Dapibus ac facilisis in</button>
-              <button type="button" class="list-group-item list-group-item-action">Morbi leo risus</button>
-              <button type="button" class="list-group-item list-group-item-action">Morbi leo risus</button>
+              <input type="button" onclick="changeChoice('<%=questions[answered].choice1%>');" id="quiz" data-id="<%=questions[answered].choice1%>" class="list-group-item list-group-item-action" value="<%=questions[answered].choice1%>">
+              <input type="button" onclick="changeChoice('<%=questions[answered].choice2%>');" id="quiz" data-id="<%=questions[answered].choice2%>" class="list-group-item list-group-item-action" value="<%=questions[answered].choice2%>">
+              <input type="button" onclick="changeChoice('<%=questions[answered].choice3%>');" id="quiz" data-id="<%=questions[answered].choice3%>" class="list-group-item list-group-item-action" value="<%=questions[answered].choice3%>">
+              <input type="button" onclick="changeChoice('<%=questions[answered].choice4%>');" id="quiz" data-id="<%=questions[answered].choice4%>" class="list-group-item list-group-item-action" value="<%=questions[answered].choice4%>">
             </ul>
         </div>
         <div class="col-sm-1 collapse" id="score">
-            Score:30
+            Score: <%=score%>
         </div>
     </div>
     <br>
     <div class="form-group row">
         <div class="col-sm-5">
-            <input class="btn btn-primary" type="button" value="Submit">
-            <input class="btn btn-success" type="button" value="Next">
+            <input class="btn btn-primary" type="button" value="Submit" id="submit" onclick="getChoice();" <%= choice === "undefined" ? "" : "disabled" %>>
+            <input class="btn btn-success" type="submit" value="Next" formaction="/next" formmethod="get" <%= answered === 2 ? "hidden" : "" %>>
         </div>
     </div>
+    <div class="form-group row" <%= retake === false ? "hidden" : "" %>>
+        <div class="col-sm-5">
+            <h4>Total Score: <%=score%></h4>
+            <input class="btn btn-success" type="submit" value="Retake Quiz" formaction="/" formmethod="get">
+        </div>
+    </div>
+    </form>
 </div>
+<script>
+    var itemChoice="undefined";
+    function changeChoice(newChoice){
+        console.log("choice: "+itemChoice);
+        itemChoice=newChoice;
+    }
+    function getChoice(){
+        const buttons=document.querySelector(".list-group-item");
+        var answered=<%=answered%>;
+        console.log(buttons.dataset.id);
+        if(answered==2){
+            var url="/complete?choice="+itemChoice;
+        }
+        else{
+           var url="/submit?choice="+itemChoice; 
+        }
+        window.location.replace(url);
+    }
+    $(document).ready(function(){
+        var choice = "<%=choice %>";
+        var correctChoice = "<%=questions[answered].answer %>";
+        console.log("ans: "+correctChoice);
+        console.log("choice: "+choice);
+        if(choice!="undefined"){
+            if(choice==correctChoice){
+                console.log("correct");
+                $(".list-group-item").each(function(){
+                   console.log($(this));
+                   if($(this).val()==correctChoice){
+                       $(this).addClass("list-group-item-success");
+                   }
+                });
+            }
+            else if(choice!=correctChoice){
+                console.log("here");
+                $(".list-group-item").each(function(){
+                   console.log($(this).val());
+                   if($(this).val()==correctChoice){
+                       $(this).addClass("list-group-item-success");
+                   }
+                   else if($(this).val()==choice){
+                       $(this).addClass("list-group-item-danger");
+                   }
+                });
+            }
+        }
+    });
+</script>
 <%- include('templates/footer.ejs') %>
