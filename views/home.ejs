@@ -6,23 +6,17 @@
     <form>
     <div class="form-group row">
         <div class="col-sm-5 error"><%= error === true ? 'Invalid input.' : '' %></div>
-        <div class="col-sm-1">
-            <input class="btn btn-primary" type="button" value="See Report" data-toggle="collapse" data-target="#score" aria-expanded="true" aria-controls="score">
+        <div class="col-sm-2">
+            <input class="btn btn-primary" type="button" value="See Report" data-toggle="collapse" data-target="#score" aria-expanded="true" aria-controls="score" <%= answered === 0 ? "hidden" : "" %>>
         </div>
         <div class="col-sm-3">
             <div class="form-group row">
-                <div class="col-sm-4"></div>
-                <div class="col-sm-4">
-                    <input class="btn btn-primary" type="button" value="Compare Report">
-                </div>
+                    <input class="btn btn-primary" type="button" value="Compare Report" data-toggle="collapse" data-target="#compare" aria-expanded="true" aria-controls="compare" <%= reports.length === 0 ? "hidden" : "" %> >
             </div>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
             <div class="form-group row">
-                <div class="col-sm-4"></div>
-            <div class="col-sm-4">
-                <input class="btn btn-primary" type="button" value="Average Scores">
-            </div>
+                <input class="btn btn-primary" type="button" value="Average Scores" data-toggle="collapse" data-target="#average" aria-expanded="true" aria-controls="average" <%= reports.length === 0 ? "hidden" : "" %>>
             </div>
         </div>
     </div>
@@ -37,9 +31,43 @@
               <input type="button" onclick="changeChoice('<%=questions[answered].choice4%>');" id="quiz" data-id="<%=questions[answered].choice4%>" class="list-group-item list-group-item-action" value="<%=questions[answered].choice4%>">
             </ul>
         </div>
-        <div class="col-sm-1 collapse" id="score">
-            Score: <%=score%>
+        <div class="col-sm-2">
+            <span id="score" class="collapse">Score: <%=score%></span>
         </div>
+        <div class="col-sm-3 comp">
+            <table id="compare" class="collapse compare">
+              <tr>
+                <th>Email</th>
+                <th>Score</th>
+                <th>Time</th>
+              </tr>
+            <% scores.forEach(function(score){  %>
+             <tr>
+                <td><%=score.email%></td>
+                <td><%=score.score%></td>
+                <td><%=score.timestamp%></td>
+             </tr>
+            <% }); %>
+        </table>
+        </div>
+    <div class="col-sm-2">
+        <div id="average" class="collapse">
+            <table id="average" class="average">
+              <tr>
+                <th>Time</th>
+                <th>Score</th>
+              </tr>
+            <% reports.forEach(function(report){  %>
+             <tr>
+                <td><%=report.timestamp%></td>
+                <td><%=report.score%></td>
+             </tr>
+            <% }); %>
+        </table><br>
+        Average: <%=avg%>
+        </div>
+        </div>
+    </div>
     </div>
     <br>
     <div class="form-group row">

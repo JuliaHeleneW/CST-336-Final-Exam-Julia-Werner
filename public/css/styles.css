@@ -9,3 +9,20 @@ body{
 .jumbotron{
 	font-weight:bold;
 }
+.comp,.average{
+	font-size:12px;
+}
+/*.col-sm-2,.col-sm-5,.col-sm-1,.col-sm-3{
+	border:1px solid black;
+}*/
+table{
+	border:0.5px solid black;
+}
+
+.compare tr:nth-child(even) {
+  background-color: #c3e6cb;
+}
+
+.average tr:nth-child(odd) {
+  background-color: #f5c6cb;
+}
