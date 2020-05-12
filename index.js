@@ -30,7 +30,7 @@ const connection = mysql.createConnection({
 });
 connection.connect();
 
-/* Global variables */
+/* Global variables that can be used and adjusted for function calls to avoid duplicate select statements */
 var score = 0;
 var answered = 0;
 var counter = 1;
@@ -46,6 +46,8 @@ function hasEmail(req, res, next){
 }
 
 /* Functions */
+
+//function to get random questions using the underscore packet
 function getRandomQuestions(questions){
     var randomIdx=[0,1,2];
     randomIdx=underscore.shuffle(randomIdx);
@@ -69,16 +71,6 @@ function getRandomQuestions(questions){
     return newRands;
 }
 
-function getAllReports(){
-    let stmt = 'SELECT * FROM scores';
-    return new Promise(function(resolve, reject){
-       connection.query(stmt,  function(error, results){
-           if(error) throw error;
-           resolve(results);
-       }); 
-    });
-}
-
 /* Configure our server to read public folder and ejs files */
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
@@ -88,90 +80,100 @@ app.get('/',hasEmail, function(req, res){
     counter=1;
     answered=0;
     score=0;
+    //questions
     var stmt = 'SELECT * FROM questions;';
+    //input options for reports
     var stmt2 = 'SELECT * FROM scores;';
     var stmt3 = 'SELECT score,timestamp FROM scores WHERE email=\''+req.session.email+'\';';
     var stmt4 = 'SELECT AVG(score) FROM scores WHERE email=\''+req.session.email+'\';';
-    console.log(stmt3);
-    console.log(stmt4);
 	connection.query(stmt.concat(stmt2,stmt3,stmt4),[1,2,3,4], function(error, found){
 	    if(error) throw error;
 	    if(found.length){
-	        console.log(found);
 	    	//get random order for question
 	    	//for each question, get random answers
 	    	questions=getRandomQuestions(found[0]);
 	    	scores=found[1];
 	    	scores.forEach(function(score){
+	    	    //update score timestamp to display less data
 	    	    var slicedTime=score.timestamp.toString().split(' ').slice(0,5).join(' ');
 	    	    score.timestamp=slicedTime;
 	    	});
-	    	console.log(scores);
 	    	reports=found[2];
 	    	reports.forEach(function(report){
+	    	    //update report timestamp to display less data
 	    	    var slicedTime=report.timestamp.toString().split(' ').slice(0,5).join(' ');
 	    	    report.timestamp=slicedTime;
 	    	});
+	    	//store average score
 	    	avg=found[3][0]['AVG(score)'];
-	    	console.log("avg:"+avg);
+	    	
+	    	//render home page
 	    	res.render('home', {questions:questions,counter:counter,answered:answered,score:score,choice:"undefined",error:false,retake:false,scores:scores,reports:reports,avg:avg});
 	    }
 	});
 });
 
+/*route to navitage to next question */
 app.get('/next',hasEmail,function(req, res) {
+    //one more question has been answered
     answered++;
-    console.log(answered);
+    //home page will now display next question
     res.render('home', {questions:questions,counter:counter,answered:answered,score:score,choice:"undefined",error:false,retake:false,scores:scores,reports:reports,avg:avg});
 });
 
+/* route to submit a question */
 app.get('/submit',hasEmail,function(req, res) {
+    //get user choice from query
     var choice=req.query.choice;
+    //if no choice was made, display error message
     if(choice=="undefined"){
         res.render('home', {questions:questions,counter:counter,answered:answered,score:score,choice:"undefined",error:true,retake:false,scores:scores,reports:reports,avg:avg}); 
     }
     else{
-      //var answer=req.body.dataset.id;
-        console.log("choice:"+req.query.choice);
-        console.log("here");
+        //correct answer
         var answer=questions[answered].answer;
+        //increment score if correct answer
         if(choice==answer){
             score++;
         }
+        //render home page with updated score and updated choice for color background of questions
         res.render('home', {questions:questions,counter:counter,answered:answered,score:score,choice:choice,error:false,retake:false,scores:scores,reports:reports,avg:avg});
     }
 });
 
+/* route when user submitted all 3 questions */
 app.get('/complete',hasEmail,function(req, res) {
+    //get choice from user query
     var choice=req.query.choice;
+    //if no choice was made, display error message
     if(choice=="undefined"){
         res.render('home', {questions:questions,counter:counter,answered:answered,score:score,choice:"undefined",error:true,retake:false,scores:scores,reports:reports,avg:avg}); 
     }
+    //update score if answer was correct
     var answer=questions[answered].answer;
     if(choice==answer){
         score++;
     }
     //insert data into DB
     let stmt = 'INSERT INTO scores (email,score,timestamp) VALUES (\''+req.session.email+'\',\''+score+'\' ,CURRENT_TIMESTAMP);';
-    //update scores
+    //update reports since player scores are updated
     var stmt2 = 'SELECT * FROM scores;';
     var stmt3 = 'SELECT score,timestamp FROM scores WHERE email=\''+req.session.email+'\';';
     var stmt4 = 'SELECT AVG(score) FROM scores WHERE email=\''+req.session.email+'\';';
     connection.query(stmt.concat(stmt2,stmt3,stmt4),[1,2,3,4], function(error, result){
        if(error) throw error;
-       console.log(result);
        scores=result[1];
     	scores.forEach(function(score){
     	    var slicedTime=score.timestamp.toString().split(' ').slice(0,5).join(' ');
     	    score.timestamp=slicedTime;
     	});
-    	console.log(scores);
     	reports=result[2];
     	reports.forEach(function(report){
     	    var slicedTime=report.timestamp.toString().split(' ').slice(0,5).join(' ');
     	    report.timestamp=slicedTime;
     	});
     	avg=result[3][0]['AVG(score)'];
+    	/*render home page with retake as true to display retake quiz option */
        res.render('home', {questions:questions,counter:counter,answered:answered,score:score,choice:choice,error:false,retake:true,scores:scores,reports:reports,avg:avg}); 
     });
 });
@@ -181,15 +183,12 @@ app.get('/email', function(req, res){
     res.render('email');
 });
 
+/* route to save email in session */
 app.post('/email',function(req,res){
     req.session.hasEmail = true;
     req.session.email = req.body.email;
     console.log("email saved");
     res.redirect('/');
-});
-
-app.get('/complete',function(req, res) {
-    
 });
 
 /* The handler for undefined routes */

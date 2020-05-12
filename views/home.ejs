@@ -7,24 +7,29 @@
     <div class="form-group row">
         <div class="col-sm-5 error"><%= error === true ? 'Invalid input.' : '' %></div>
         <div class="col-sm-2">
+            <!--See report is only shown when the user answered at least one question-->   
             <input class="btn btn-primary" type="button" value="See Report" data-toggle="collapse" data-target="#score" aria-expanded="true" aria-controls="score" <%= answered === 0 ? "hidden" : "" %>>
         </div>
         <div class="col-sm-3">
             <div class="form-group row">
+                <!--Compare report is only shown if the user has taken at least one quiz-->
                     <input class="btn btn-primary" type="button" value="Compare Report" data-toggle="collapse" data-target="#compare" aria-expanded="true" aria-controls="compare" <%= reports.length === 0 ? "hidden" : "" %> >
             </div>
         </div>
         <div class="col-sm-2">
             <div class="form-group row">
+                <!--Average Scores is only shown when the user has taken at least 2 quizzes, since there's not really an average otherwise-->
                 <input class="btn btn-primary" type="button" value="Average Scores" data-toggle="collapse" data-target="#average" aria-expanded="true" aria-controls="average" <%= reports.length === 0 || reports.length === 1 ? "hidden" : "" %>>
             </div>
         </div>
     </div>
     <div class="form-group row">
         <div class="col-sm-5">
+            <!--question-->
         <%=questions[answered].question%><br>
         <hr>
             <ul class="list-group">
+                <!--answer-->
               <input type="button" onclick="changeChoice('<%=questions[answered].choice1%>');" id="quiz" data-id="<%=questions[answered].choice1%>" class="list-group-item list-group-item-action" value="<%=questions[answered].choice1%>">
               <input type="button" onclick="changeChoice('<%=questions[answered].choice2%>');" id="quiz" data-id="<%=questions[answered].choice2%>" class="list-group-item list-group-item-action" value="<%=questions[answered].choice2%>">
               <input type="button" onclick="changeChoice('<%=questions[answered].choice3%>');" id="quiz" data-id="<%=questions[answered].choice3%>" class="list-group-item list-group-item-action" value="<%=questions[answered].choice3%>">
@@ -34,6 +39,7 @@
         <div class="col-sm-2">
             <span id="score" class="collapse">Score: <%=score%></span>
         </div>
+        <!--body for compare report-->
         <div class="col-sm-3 comp">
             <table id="compare" class="collapse compare">
               <tr>
@@ -50,6 +56,7 @@
             <% }); %>
         </table>
         </div>
+        <!--body for average scores-->
     <div class="col-sm-2">
         <div id="average" class="collapse">
             <table id="average" class="average">
@@ -70,12 +77,16 @@
     </div>
     </div>
     <br>
+    <!--submit and next button-->
     <div class="form-group row">
         <div class="col-sm-5">
+            <!--submit button is disabled once a question has been answered to keep the score accurate-->
             <input class="btn btn-primary" type="button" value="Submit" id="submit" onclick="getChoice();" <%= choice === "undefined" ? "" : "disabled" %>>
+            <!--next button is disabled until user has answered the question to avoid questions being skipped-->
             <input class="btn btn-success" type="submit" value="Next" formaction="/next" formmethod="get" <%= choice === "undefined" ?  "disabled" : "" %> <%= answered === 2 ? "hidden" : "" %>>
         </div>
     </div>
+    <!--total score and retake option only shown if user answered all questions-->
     <div class="form-group row" <%= retake === false ? "hidden" : "" %>>
         <div class="col-sm-5">
             <h4>Total Score: <%=score%></h4>
@@ -85,29 +96,38 @@
     </form>
 </div>
 <script>
-    var itemChoice="undefined";
+    var itemChoice="undefined"; //current button clicked
+    
+    //function to update answer item choice whenever a button is clicked
     function changeChoice(newChoice){
         console.log("choice: "+itemChoice);
         itemChoice=newChoice;
     }
+    
+    //function to get a URL for the submit or complete page with query input
     function getChoice(){
         const buttons=document.querySelector(".list-group-item");
         var answered=<%=answered%>;
         console.log(buttons.dataset.id);
+        
+        //go to complete route if all questions were answered; it will display the retake option and insert the item into the DB
         if(answered==2){
             var url="/complete?choice="+itemChoice;
         }
+        //otherwise go to the submit route
         else{
            var url="/submit?choice="+itemChoice; 
         }
         window.location.replace(url);
     }
     $(document).ready(function(){
+        //get EJS variables for the choice (relevant if submitted) and the correct answer
         var choice = "<%=choice %>";
         var correctChoice = "<%=questions[answered].answer %>";
-        console.log("ans: "+correctChoice);
-        console.log("choice: "+choice);
+        
+        //if there is a submitted choice, update the answer background colors
         if(choice!="undefined"){
+            //correct choice route
             if(choice==correctChoice){
                 console.log("correct");
                 $(".list-group-item").each(function(){
@@ -117,13 +137,14 @@
                    }
                 });
             }
+            //incorrect choice route
             else if(choice!=correctChoice){
-                console.log("here");
                 $(".list-group-item").each(function(){
-                   console.log($(this).val());
+                   //update correct choice with green background
                    if($(this).val()==correctChoice){
                        $(this).addClass("list-group-item-success");
                    }
+                   //update incorrect choice with red background
                    else if($(this).val()==choice){
                        $(this).addClass("list-group-item-danger");
                    }
