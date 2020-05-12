@@ -64,24 +64,24 @@ promise() //res is 1, so 1 is passed into first then handler
 
 CRUD stands for the four basic functions that operate on a Database management system: create, read, update and delete. Each of them have their own functionalities:
 
-**Create:** The functionality of create is to insert new data into the database.
-Express method: `app.post`
-SQL statement: 
+**Create:** The functionality of create is to insert new data into the database.\
+Express method: `app.post`\
+SQL statement: \
 `INSERT INTO tableName (field1, field2, …, fieldN) VALUES (value1, value2, …, valueN)`
 
-**Read:** The functionality of read is to retrieve existing data, often to display them. There are lots of ways to display data, includincombining tables with common elements or conditions (the where part of a select statement).
-Express method: `app.get`
-SQL statement: 
+**Read:** The functionality of read is to retrieve existing data, often to display them. There are lots of ways to display data, includincombining tables with common elements or conditions (the where part of a select statement).\
+Express method: `app.get` \
+SQL statement: \
 `SELECT * FROM tableName [WHERE conditions]`
 
-**Update:** The functionality of update is to update specific existing data, usually with a where condition for a specific ID or other where conditions. 
-Express method: `app.put`
-SQL statement: 
+**Update:** The functionality of update is to update specific existing data, usually with a where condition for a specific ID or other where conditions. \
+Express method: `app.put`\
+SQL statement: \
 `UPDATE tableName SET field1=value1, field2=value2, …, fieldN=valueN [WHERE conditions]`
 
-**Delete:** The functionality of delete is to delete specific existing data based on where conditions, often an ID.
-Express method: `app.delete`
-SQL statement: 
+**Delete:** The functionality of delete is to delete specific existing data based on where conditions, often an ID.\
+Express method: `app.delete`\
+SQL statement: \
 `DELETE FROM tableName [WHERE conditions]`
 
 ##### Part 2 tasks attempted:
